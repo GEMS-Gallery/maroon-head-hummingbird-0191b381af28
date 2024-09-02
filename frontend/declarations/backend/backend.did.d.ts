@@ -4,9 +4,9 @@ import type { IDL } from '@dfinity/candid';
 
 export interface File {
   'id' : bigint,
-  'preview' : string,
+  'content' : Uint8Array | number[],
   'name' : string,
-  'size' : [] | [bigint],
+  'size' : bigint,
   'fileType' : string,
   'category' : string,
   'inTrash' : boolean,
@@ -20,11 +20,13 @@ export interface _SERVICE {
   'createFolder' : ActorMethod<[string], Result>,
   'deleteFolder' : ActorMethod<[bigint], Result_1>,
   'getFiles' : ActorMethod<[], Array<File>>,
+  'getFilesByCategory' : ActorMethod<[string], Array<File>>,
   'getFolders' : ActorMethod<[], Array<Folder>>,
+  'getTrashFiles' : ActorMethod<[], Array<File>>,
   'moveFileToTrash' : ActorMethod<[bigint], Result_1>,
   'restoreFileFromTrash' : ActorMethod<[bigint], Result_1>,
   'uploadFile' : ActorMethod<
-    [string, string, [] | [bigint], string, string],
+    [string, string, bigint, string, Uint8Array | number[]],
     Result
   >,
 }

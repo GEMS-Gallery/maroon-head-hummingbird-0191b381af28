@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FileBox</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
+    <script src="https://unpkg.com/@dfinity/agent/lib/index.js"></script>
+    <script src="https://unpkg.com/@dfinity/candid/lib/index.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -365,47 +367,56 @@
     </div>
 
     <script>
-        const files = [
-            { id: 1, name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=PDF' },
-            { id: 2, name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=Folder' },
-            { id: 3, name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=PPTX' },
-            { id: 4, name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=JS' },
-            { id: 5, name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=JPG' },
-            { id: 6, name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP3' },
-            { id: 7, name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=ZIP' },
-            { id: 8, name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP4' },
-        ];
-
+        let actor;
         let currentViewMode = 'list';
+        let currentCategory = 'all';
+
+        async function initializeActor() {
+            const canisterId = 'rrkah-fqaaa-aaaaa-aaaaq-cai'; // Replace with your actual canister ID
+            const agent = new window.ic.agent.HttpAgent();
+            await agent.fetchRootKey();
+            actor = window.ic.actor.createActor(canisterInterface, { agent, canisterId });
+        }
+
+        async function fetchFiles() {
+            try {
+                if (currentCategory === 'all' || currentCategory === 'my-files') {
+                    return await actor.getFiles();
+                } else if (currentCategory === 'trash') {
+                    return await actor.getTrashFiles();
+                } else {
+                    return await actor.getFilesByCategory(currentCategory);
+                }
+            } catch (error) {
+                console.error('Error fetching files:', error);
+                return [];
+            }
+        }
 
         function setViewMode(mode) {
             currentViewMode = mode;
             document.getElementById('gridViewBtn').classList.toggle('active', mode === 'grid');
             document.getElementById('listViewBtn').classList.toggle('active', mode === 'list');
-            renderFiles(currentCategory);
+            renderFiles();
         }
 
-        function renderFiles(category = 'all') {
+        async function renderFiles() {
             const filesContainer = document.getElementById('filesContainer');
             filesContainer.innerHTML = '';
             
-            const filteredFiles = category === 'all' 
-                ? files.filter(file => !file.inTrash)
-                : category === 'trash'
-                ? files.filter(file => file.inTrash)
-                : files.filter(file => file.category === category && !file.inTrash);
+            const files = await fetchFiles();
             
             if (currentViewMode === 'list') {
                 filesContainer.className = 'files-list';
-                filteredFiles.forEach(file => {
+                files.forEach(file => {
                     const li = document.createElement('li');
                     li.className = 'file-item';
                     li.innerHTML = `
-                        <img src="${file.preview}" alt="${file.name} preview" class="file-preview">
-                        <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
+                        <img src="data:image/png;base64,${file.content}" alt="${file.name} preview" class="file-preview">
+                        <i data-feather="${getFileIcon(file.fileType)}" class="file-icon icon-${getFileIcon(file.fileType)}"></i>
                         <div class="file-details">
                             <p class="file-name">${file.name}</p>
-                            <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`} - ${file.category}</p>
+                            <p class="file-info">${formatFileSize(file.size)} - ${file.category}</p>
                         </div>
                         <div class="file-actions">
                             ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
@@ -416,13 +427,13 @@
                 });
             } else {
                 filesContainer.className = 'files-grid';
-                filteredFiles.forEach(file => {
+                files.forEach(file => {
                     const div = document.createElement('div');
                     div.className = 'file-item-grid';
                     div.innerHTML = `
-                        <img src="${file.preview}" alt="${file.name} preview" class="file-preview-grid">
+                        <img src="data:image/png;base64,${file.content}" alt="${file.name} preview" class="file-preview-grid">
                         <p class="file-name-grid">${file.name}</p>
-                        <p class="file-info-grid">${file.type === 'file' ? file.size : `${file.items} items`}</p>
+                        <p class="file-info-grid">${formatFileSize(file.size)}</p>
                         <div class="file-actions">
                             ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
                             ${file.inTrash ? `<i data-feather="refresh-cw" class="restore-icon" onclick="restoreFromTrash(${file.id})"></i>` : ''}
@@ -436,30 +447,28 @@
             feather.replace();
         }
 
-        function moveToTrash(fileId) {
-            const fileIndex = files.findIndex(file => file.id === fileId);
-            if (fileIndex !== -1) {
-                files[fileIndex].inTrash = true;
-                files[fileIndex].category = 'trash';
-                renderFiles(currentCategory);
+        async function moveToTrash(fileId) {
+            try {
+                await actor.moveFileToTrash(fileId);
+                renderFiles();
+            } catch (error) {
+                console.error('Error moving file to trash:', error);
             }
         }
 
-        function restoreFromTrash(fileId) {
-            const fileIndex = files.findIndex(file => file.id === fileId);
-            if (fileIndex !== -1) {
-                files[fileIndex].inTrash = false;
-                renderFiles('trash');
+        async function restoreFromTrash(fileId) {
+            try {
+                await actor.restoreFileFromTrash(fileId);
+                renderFiles();
+            } catch (error) {
+                console.error('Error restoring file from trash:', error);
             }
         }
 
         function setActiveMenuItem(clickedItem) {
-            // Remove 'active' class from all menu items
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
             });
-
-            // Add 'active' class to the clicked item
             clickedItem.classList.add('active');
         }
 
@@ -508,14 +517,22 @@
             handleFiles(this.files);
         }
 
-        function handleFiles(files) {
+        async function handleFiles(files) {
             for (let file of files) {
-                console.log("File uploaded:", file.name);
-                // Here you would typically send the file to your backend
-                // For now, we'll just add it to our files array
-                addFileToList(file);
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        const content = new Uint8Array(e.target.result);
+                        const category = categorySelect.value || detectCategory(file);
+                        await actor.uploadFile(file.name, file.type, file.size, category, content);
+                    };
+                    reader.readAsArrayBuffer(file);
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                }
             }
             modal.style.display = "none";
+            renderFiles();
         }
 
         function detectCategory(file) {
@@ -535,65 +552,57 @@
             }
         }
 
-        function addFileToList(file) {
-            const fileSize = (file.size / 1024).toFixed(1) + " KB";
-            const fileType = file.type.split('/')[0];
-            let icon = 'file';
-            let preview = 'https://via.placeholder.com/40x40.png?text=File';
-            if (fileType === 'image') {
-                icon = 'image';
-                preview = URL.createObjectURL(file);
+        function getFileIcon(fileType) {
+            const type = fileType.split('/')[0];
+            switch(type) {
+                case 'image': return 'image';
+                case 'video': return 'film';
+                case 'audio': return 'music';
+                case 'application':
+                case 'text':
+                    return 'file-text';
+                default:
+                    return 'file';
             }
-            else if (fileType === 'video') icon = 'film';
-            else if (fileType === 'audio') icon = 'music';
-
-            const category = categorySelect.value || detectCategory(file);
-
-            const newFile = {
-                id: files.length + 1,
-                name: file.name,
-                type: 'file',
-                size: fileSize,
-                icon: icon,
-                category: category,
-                inTrash: false,
-                preview: preview
-            };
-
-            files.unshift(newFile);
-            renderFiles(currentCategory);
         }
 
-        let currentCategory = 'all';
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+            else return (bytes / 1073741824).toFixed(1) + ' GB';
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeActor();
             renderFiles();
-            feather.replace(); // Replace icons in the sidebar, header, and search bar
+            feather.replace();
 
-            // Add click event listeners to all menu items
             document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', (event) => {
+                item.addEventListener('click', async (event) => {
                     event.preventDefault();
                     setActiveMenuItem(item);
                     const category = item.dataset.section;
                     const currentCategoryElement = document.getElementById('currentCategory');
                     if (category === 'home') {
                         currentCategory = 'all';
-                        renderFiles('all');
                         currentCategoryElement.textContent = 'My Files';
                     } else if (['photos', 'videos', 'documents', 'audio', 'trash'].includes(category)) {
                         currentCategory = category;
-                        renderFiles(category);
                         currentCategoryElement.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                     } else {
                         console.log('Clicked on:', category);
                     }
+                    await renderFiles();
                 });
             });
 
-            // Set initial view mode
             setViewMode('list');
         });
+
+        const canisterInterface = {
+          // Add your canister interface here
+        };
     </script>
 </body>
 </html>
