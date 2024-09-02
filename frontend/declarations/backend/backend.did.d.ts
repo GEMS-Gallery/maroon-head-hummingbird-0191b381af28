@@ -8,6 +8,7 @@ export interface File {
   'size' : [] | [bigint],
   'fileType' : string,
   'category' : string,
+  'inTrash' : boolean,
 }
 export interface Folder { 'id' : bigint, 'name' : string }
 export type Result = { 'ok' : bigint } |
@@ -16,10 +17,11 @@ export type Result_1 = { 'ok' : null } |
   { 'err' : string };
 export interface _SERVICE {
   'createFolder' : ActorMethod<[string], Result>,
-  'deleteFile' : ActorMethod<[bigint], Result_1>,
   'deleteFolder' : ActorMethod<[bigint], Result_1>,
   'getFiles' : ActorMethod<[], Array<File>>,
   'getFolders' : ActorMethod<[], Array<Folder>>,
+  'moveFileToTrash' : ActorMethod<[bigint], Result_1>,
+  'restoreFileFromTrash' : ActorMethod<[bigint], Result_1>,
   'uploadFile' : ActorMethod<[string, string, [] | [bigint], string], Result>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;

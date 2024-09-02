@@ -14,6 +14,7 @@ actor {
     fileType: Text;
     size: ?Nat;
     category: Text;
+    inTrash: Bool;
   };
 
   type Folder = {
@@ -42,6 +43,7 @@ actor {
       fileType = fileType;
       size = size;
       category = category;
+      inTrash = false;
     };
     files := Array.append(files, [newFile]);
     #ok(fileIdCounter)
@@ -57,8 +59,39 @@ actor {
     #ok(folderIdCounter)
   };
 
-  public func deleteFile(id : Nat) : async Result.Result<(), Text> {
-    files := Array.filter(files, func (f : File) : Bool { f.id != id });
+  public func moveFileToTrash(id : Nat) : async Result.Result<(), Text> {
+    files := Array.map(files, func (f : File) : File {
+      if (f.id == id) {
+        {
+          id = f.id;
+          name = f.name;
+          fileType = f.fileType;
+          size = f.size;
+          category = "trash";
+          inTrash = true;
+        }
+      } else {
+        f
+      }
+    });
+    #ok(())
+  };
+
+  public func restoreFileFromTrash(id : Nat) : async Result.Result<(), Text> {
+    files := Array.map(files, func (f : File) : File {
+      if (f.id == id and f.inTrash) {
+        {
+          id = f.id;
+          name = f.name;
+          fileType = f.fileType;
+          size = f.size;
+          category = f.category;
+          inTrash = false;
+        }
+      } else {
+        f
+      }
+    });
     #ok(())
   };
 

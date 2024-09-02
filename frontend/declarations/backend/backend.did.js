@@ -7,14 +7,16 @@ export const idlFactory = ({ IDL }) => {
     'size' : IDL.Opt(IDL.Nat),
     'fileType' : IDL.Text,
     'category' : IDL.Text,
+    'inTrash' : IDL.Bool,
   });
   const Folder = IDL.Record({ 'id' : IDL.Nat, 'name' : IDL.Text });
   return IDL.Service({
     'createFolder' : IDL.Func([IDL.Text], [Result], []),
-    'deleteFile' : IDL.Func([IDL.Nat], [Result_1], []),
     'deleteFolder' : IDL.Func([IDL.Nat], [Result_1], []),
     'getFiles' : IDL.Func([], [IDL.Vec(File)], ['query']),
     'getFolders' : IDL.Func([], [IDL.Vec(Folder)], ['query']),
+    'moveFileToTrash' : IDL.Func([IDL.Nat], [Result_1], []),
+    'restoreFileFromTrash' : IDL.Func([IDL.Nat], [Result_1], []),
     'uploadFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat), IDL.Text],
         [Result],

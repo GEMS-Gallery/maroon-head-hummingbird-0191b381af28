@@ -118,9 +118,9 @@
             font-size: 0.875rem;
             color: #666;
         }
-        .more-options {
-            color: #999;
-            cursor: pointer;
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
         }
         .icon-file-text { color: #4299e1; }
         .icon-folder { color: #ecc94b; }
@@ -301,21 +301,25 @@
 
     <script>
         const files = [
-            { name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents' },
-            { name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos' },
-            { name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents' },
-            { name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents' },
-            { name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos' },
-            { name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio' },
-            { name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other' },
-            { name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos' },
+            { id: 1, name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents', inTrash: false },
+            { id: 2, name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos', inTrash: false },
+            { id: 3, name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents', inTrash: false },
+            { id: 4, name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents', inTrash: false },
+            { id: 5, name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos', inTrash: false },
+            { id: 6, name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio', inTrash: false },
+            { id: 7, name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other', inTrash: false },
+            { id: 8, name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos', inTrash: false },
         ];
 
         function renderFiles(category = 'all') {
             const filesList = document.getElementById('filesList');
             filesList.innerHTML = '';
             
-            const filteredFiles = category === 'all' ? files : files.filter(file => file.category === category);
+            const filteredFiles = category === 'all' 
+                ? files.filter(file => !file.inTrash)
+                : category === 'trash'
+                ? files.filter(file => file.inTrash)
+                : files.filter(file => file.category === category && !file.inTrash);
             
             filteredFiles.forEach(file => {
                 const li = document.createElement('li');
@@ -326,13 +330,33 @@
                         <p class="file-name">${file.name}</p>
                         <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`} - ${file.category}</p>
                     </div>
-                    <i data-feather="more-horizontal" class="more-options"></i>
+                    <div class="file-actions">
+                        ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
+                        ${file.inTrash ? `<i data-feather="refresh-cw" class="restore-icon" onclick="restoreFromTrash(${file.id})"></i>` : ''}
+                    </div>
                 `;
                 filesList.appendChild(li);
             });
 
             // Replace all feather icons with SVG
             feather.replace();
+        }
+
+        function moveToTrash(fileId) {
+            const fileIndex = files.findIndex(file => file.id === fileId);
+            if (fileIndex !== -1) {
+                files[fileIndex].inTrash = true;
+                files[fileIndex].category = 'trash';
+                renderFiles(currentCategory);
+            }
+        }
+
+        function restoreFromTrash(fileId) {
+            const fileIndex = files.findIndex(file => file.id === fileId);
+            if (fileIndex !== -1) {
+                files[fileIndex].inTrash = false;
+                renderFiles('trash');
+            }
         }
 
         function setActiveMenuItem(clickedItem) {
@@ -427,16 +451,21 @@
 
             const category = categorySelect.value || detectCategory(file);
 
-            files.unshift({
+            const newFile = {
+                id: files.length + 1,
                 name: file.name,
                 type: 'file',
                 size: fileSize,
                 icon: icon,
-                category: category
-            });
+                category: category,
+                inTrash: false
+            };
 
-            renderFiles();
+            files.unshift(newFile);
+            renderFiles(currentCategory);
         }
+
+        let currentCategory = 'all';
 
         document.addEventListener('DOMContentLoaded', () => {
             renderFiles();
@@ -448,13 +477,15 @@
                     event.preventDefault();
                     setActiveMenuItem(item);
                     const category = item.dataset.section;
-                    const currentCategory = document.getElementById('currentCategory');
+                    const currentCategoryElement = document.getElementById('currentCategory');
                     if (category === 'home') {
+                        currentCategory = 'all';
                         renderFiles('all');
-                        currentCategory.textContent = 'My Files';
-                    } else if (['photos', 'videos', 'documents', 'audio'].includes(category)) {
+                        currentCategoryElement.textContent = 'My Files';
+                    } else if (['photos', 'videos', 'documents', 'audio', 'trash'].includes(category)) {
+                        currentCategory = category;
                         renderFiles(category);
-                        currentCategory.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                        currentCategoryElement.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                     } else {
                         console.log('Clicked on:', category);
                     }

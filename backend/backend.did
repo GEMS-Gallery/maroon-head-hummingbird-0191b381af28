@@ -18,14 +18,16 @@ type File =
    category: text;
    fileType: text;
    id: nat;
+   inTrash: bool;
    name: text;
    size: opt nat;
  };
 service : {
   createFolder: (text) -> (Result);
-  deleteFile: (nat) -> (Result_1);
   deleteFolder: (nat) -> (Result_1);
   getFiles: () -> (vec File) query;
   getFolders: () -> (vec Folder) query;
+  moveFileToTrash: (nat) -> (Result_1);
+  restoreFileFromTrash: (nat) -> (Result_1);
   uploadFile: (text, text, opt nat, text) -> (Result);
 }
