@@ -1,0 +1,30 @@
+type Result_1 = 
+ variant {
+   err: text;
+   ok;
+ };
+type Result = 
+ variant {
+   err: text;
+   ok: nat;
+ };
+type Folder = 
+ record {
+   id: nat;
+   name: text;
+ };
+type File = 
+ record {
+   fileType: text;
+   id: nat;
+   name: text;
+   size: opt nat;
+ };
+service : {
+  createFolder: (text) -> (Result);
+  deleteFile: (nat) -> (Result_1);
+  deleteFolder: (nat) -> (Result_1);
+  getFiles: () -> (vec File);
+  getFolders: () -> (vec Folder);
+  uploadFile: (text, text, opt nat) -> (Result);
+}
