@@ -6,6 +6,7 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'size' : IDL.Opt(IDL.Nat),
     'fileType' : IDL.Text,
+    'category' : IDL.Text,
   });
   const Folder = IDL.Record({ 'id' : IDL.Nat, 'name' : IDL.Text });
   return IDL.Service({
@@ -15,7 +16,7 @@ export const idlFactory = ({ IDL }) => {
     'getFiles' : IDL.Func([], [IDL.Vec(File)], ['query']),
     'getFolders' : IDL.Func([], [IDL.Vec(Folder)], ['query']),
     'uploadFile' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat)],
+        [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat), IDL.Text],
         [Result],
         [],
       ),

@@ -15,6 +15,7 @@ type Folder =
  };
 type File = 
  record {
+   category: text;
    fileType: text;
    id: nat;
    name: text;
@@ -26,5 +27,5 @@ service : {
   deleteFolder: (nat) -> (Result_1);
   getFiles: () -> (vec File) query;
   getFolders: () -> (vec Folder) query;
-  uploadFile: (text, text, opt nat) -> (Result);
+  uploadFile: (text, text, opt nat, text) -> (Result);
 }

@@ -203,6 +203,11 @@
         #fileInput {
             display: none;
         }
+        #categorySelect {
+            margin-top: 10px;
+            width: 100%;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -283,19 +288,27 @@
                 <p>Drag and drop files here or click to select files</p>
                 <input type="file" id="fileInput" multiple>
             </div>
+            <select id="categorySelect">
+                <option value="">Select category (optional)</option>
+                <option value="documents">Documents</option>
+                <option value="photos">Photos</option>
+                <option value="videos">Videos</option>
+                <option value="audio">Audio</option>
+                <option value="other">Other</option>
+            </select>
         </div>
     </div>
 
     <script>
         const files = [
-            { name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text' },
-            { name: 'Images', type: 'folder', items: 15, icon: 'folder' },
-            { name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text' },
-            { name: 'Script.js', type: 'file', size: '10 KB', icon: 'code' },
-            { name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image' },
-            { name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music' },
-            { name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive' },
-            { name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film' },
+            { name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents' },
+            { name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos' },
+            { name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents' },
+            { name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents' },
+            { name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos' },
+            { name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio' },
+            { name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other' },
+            { name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos' },
         ];
 
         function renderFiles() {
@@ -309,7 +322,7 @@
                     <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
                     <div class="file-details">
                         <p class="file-name">${file.name}</p>
-                        <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`}</p>
+                        <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`} - ${file.category}</p>
                     </div>
                     <i data-feather="more-horizontal" class="more-options"></i>
                 `;
@@ -336,6 +349,7 @@
         const span = document.getElementsByClassName("close")[0];
         const dropArea = document.getElementById("dropArea");
         const fileInput = document.getElementById("fileInput");
+        const categorySelect = document.getElementById("categorySelect");
 
         btn.onclick = function() {
             modal.style.display = "block";
@@ -384,6 +398,23 @@
             modal.style.display = "none";
         }
 
+        function detectCategory(file) {
+            const fileType = file.type.split('/')[0];
+            switch(fileType) {
+                case 'image':
+                    return 'photos';
+                case 'video':
+                    return 'videos';
+                case 'audio':
+                    return 'audio';
+                case 'application':
+                case 'text':
+                    return 'documents';
+                default:
+                    return 'other';
+            }
+        }
+
         function addFileToList(file) {
             const fileSize = (file.size / 1024).toFixed(1) + " KB";
             const fileType = file.type.split('/')[0];
@@ -392,11 +423,14 @@
             else if (fileType === 'video') icon = 'film';
             else if (fileType === 'audio') icon = 'music';
 
+            const category = categorySelect.value || detectCategory(file);
+
             files.unshift({
                 name: file.name,
                 type: 'file',
                 size: fileSize,
-                icon: icon
+                icon: icon,
+                category: category
             });
 
             renderFiles();

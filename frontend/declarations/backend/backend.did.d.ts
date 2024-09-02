@@ -7,6 +7,7 @@ export interface File {
   'name' : string,
   'size' : [] | [bigint],
   'fileType' : string,
+  'category' : string,
 }
 export interface Folder { 'id' : bigint, 'name' : string }
 export type Result = { 'ok' : bigint } |
@@ -19,7 +20,7 @@ export interface _SERVICE {
   'deleteFolder' : ActorMethod<[bigint], Result_1>,
   'getFiles' : ActorMethod<[], Array<File>>,
   'getFolders' : ActorMethod<[], Array<Folder>>,
-  'uploadFile' : ActorMethod<[string, string, [] | [bigint]], Result>,
+  'uploadFile' : ActorMethod<[string, string, [] | [bigint], string], Result>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

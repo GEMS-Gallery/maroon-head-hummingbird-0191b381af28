@@ -13,6 +13,7 @@ actor {
     name: Text;
     fileType: Text;
     size: ?Nat;
+    category: Text;
   };
 
   type Folder = {
@@ -33,13 +34,14 @@ actor {
     folders
   };
 
-  public func uploadFile(name : Text, fileType : Text, size : ?Nat) : async Result.Result<Nat, Text> {
+  public func uploadFile(name : Text, fileType : Text, size : ?Nat, category : Text) : async Result.Result<Nat, Text> {
     fileIdCounter += 1;
     let newFile : File = {
       id = fileIdCounter;
       name = name;
       fileType = fileType;
       size = size;
+      category = category;
     };
     files := Array.append(files, [newFile]);
     #ok(fileIdCounter)
