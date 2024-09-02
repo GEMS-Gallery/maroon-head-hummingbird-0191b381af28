@@ -20,6 +20,7 @@ type File =
    id: nat;
    inTrash: bool;
    name: text;
+   preview: text;
    size: opt nat;
  };
 service : {
@@ -29,5 +30,5 @@ service : {
   getFolders: () -> (vec Folder) query;
   moveFileToTrash: (nat) -> (Result_1);
   restoreFileFromTrash: (nat) -> (Result_1);
-  uploadFile: (text, text, opt nat, text) -> (Result);
+  uploadFile: (text, text, opt nat, text, text) -> (Result);
 }

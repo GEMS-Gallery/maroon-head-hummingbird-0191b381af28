@@ -107,6 +107,13 @@
             width: 24px;
             height: 24px;
         }
+        .file-preview {
+            width: 40px;
+            height: 40px;
+            margin-right: 1rem;
+            object-fit: cover;
+            border-radius: 4px;
+        }
         .file-details {
             flex-grow: 1;
         }
@@ -301,14 +308,14 @@
 
     <script>
         const files = [
-            { id: 1, name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents', inTrash: false },
-            { id: 2, name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos', inTrash: false },
-            { id: 3, name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents', inTrash: false },
-            { id: 4, name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents', inTrash: false },
-            { id: 5, name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos', inTrash: false },
-            { id: 6, name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio', inTrash: false },
-            { id: 7, name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other', inTrash: false },
-            { id: 8, name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos', inTrash: false },
+            { id: 1, name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=PDF' },
+            { id: 2, name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=Folder' },
+            { id: 3, name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=PPTX' },
+            { id: 4, name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=JS' },
+            { id: 5, name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=JPG' },
+            { id: 6, name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP3' },
+            { id: 7, name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=ZIP' },
+            { id: 8, name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP4' },
         ];
 
         function renderFiles(category = 'all') {
@@ -325,6 +332,7 @@
                 const li = document.createElement('li');
                 li.className = 'file-item';
                 li.innerHTML = `
+                    <img src="${file.preview}" alt="${file.name} preview" class="file-preview">
                     <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
                     <div class="file-details">
                         <p class="file-name">${file.name}</p>
@@ -445,7 +453,11 @@
             const fileSize = (file.size / 1024).toFixed(1) + " KB";
             const fileType = file.type.split('/')[0];
             let icon = 'file';
-            if (fileType === 'image') icon = 'image';
+            let preview = 'https://via.placeholder.com/40x40.png?text=File';
+            if (fileType === 'image') {
+                icon = 'image';
+                preview = URL.createObjectURL(file);
+            }
             else if (fileType === 'video') icon = 'film';
             else if (fileType === 'audio') icon = 'music';
 
@@ -458,7 +470,8 @@
                 size: fileSize,
                 icon: icon,
                 category: category,
-                inTrash: false
+                inTrash: false,
+                preview: preview
             };
 
             files.unshift(newFile);

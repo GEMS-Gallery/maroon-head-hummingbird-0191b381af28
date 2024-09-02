@@ -3,6 +3,7 @@ export const idlFactory = ({ IDL }) => {
   const Result_1 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const File = IDL.Record({
     'id' : IDL.Nat,
+    'preview' : IDL.Text,
     'name' : IDL.Text,
     'size' : IDL.Opt(IDL.Nat),
     'fileType' : IDL.Text,
@@ -18,7 +19,7 @@ export const idlFactory = ({ IDL }) => {
     'moveFileToTrash' : IDL.Func([IDL.Nat], [Result_1], []),
     'restoreFileFromTrash' : IDL.Func([IDL.Nat], [Result_1], []),
     'uploadFile' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat), IDL.Text],
+        [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text],
         [Result],
         [],
       ),

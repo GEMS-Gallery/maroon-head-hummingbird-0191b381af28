@@ -15,6 +15,7 @@ actor {
     size: ?Nat;
     category: Text;
     inTrash: Bool;
+    preview: Text;
   };
 
   type Folder = {
@@ -35,7 +36,7 @@ actor {
     folders
   };
 
-  public func uploadFile(name : Text, fileType : Text, size : ?Nat, category : Text) : async Result.Result<Nat, Text> {
+  public func uploadFile(name : Text, fileType : Text, size : ?Nat, category : Text, preview : Text) : async Result.Result<Nat, Text> {
     fileIdCounter += 1;
     let newFile : File = {
       id = fileIdCounter;
@@ -44,6 +45,7 @@ actor {
       size = size;
       category = category;
       inTrash = false;
+      preview = preview;
     };
     files := Array.append(files, [newFile]);
     #ok(fileIdCounter)
@@ -69,6 +71,7 @@ actor {
           size = f.size;
           category = "trash";
           inTrash = true;
+          preview = f.preview;
         }
       } else {
         f
@@ -87,6 +90,7 @@ actor {
           size = f.size;
           category = f.category;
           inTrash = false;
+          preview = f.preview;
         }
       } else {
         f

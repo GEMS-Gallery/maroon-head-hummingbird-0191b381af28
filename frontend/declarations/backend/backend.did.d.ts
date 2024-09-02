@@ -4,6 +4,7 @@ import type { IDL } from '@dfinity/candid';
 
 export interface File {
   'id' : bigint,
+  'preview' : string,
   'name' : string,
   'size' : [] | [bigint],
   'fileType' : string,
@@ -22,7 +23,10 @@ export interface _SERVICE {
   'getFolders' : ActorMethod<[], Array<Folder>>,
   'moveFileToTrash' : ActorMethod<[bigint], Result_1>,
   'restoreFileFromTrash' : ActorMethod<[bigint], Result_1>,
-  'uploadFile' : ActorMethod<[string, string, [] | [bigint], string], Result>,
+  'uploadFile' : ActorMethod<
+    [string, string, [] | [bigint], string, string],
+    Result
+  >,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
