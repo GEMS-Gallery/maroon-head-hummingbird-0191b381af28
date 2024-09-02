@@ -270,7 +270,7 @@
             
             <div class="files-container">
                 <div class="files-header">
-                    <h2>My Files</h2>
+                    <h2 id="currentCategory">My Files</h2>
                 </div>
                 <ul class="files-list" id="filesList">
                     <!-- File items will be inserted here by JavaScript -->
@@ -311,11 +311,13 @@
             { name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos' },
         ];
 
-        function renderFiles() {
+        function renderFiles(category = 'all') {
             const filesList = document.getElementById('filesList');
             filesList.innerHTML = '';
             
-            files.forEach(file => {
+            const filteredFiles = category === 'all' ? files : files.filter(file => file.category === category);
+            
+            filteredFiles.forEach(file => {
                 const li = document.createElement('li');
                 li.className = 'file-item';
                 li.innerHTML = `
@@ -445,8 +447,17 @@
                 item.addEventListener('click', (event) => {
                     event.preventDefault();
                     setActiveMenuItem(item);
-                    // Here you can add logic to change the main content based on the clicked item
-                    console.log('Clicked on:', item.dataset.section);
+                    const category = item.dataset.section;
+                    const currentCategory = document.getElementById('currentCategory');
+                    if (category === 'home') {
+                        renderFiles('all');
+                        currentCategory.textContent = 'My Files';
+                    } else if (['photos', 'videos', 'documents', 'audio'].includes(category)) {
+                        renderFiles(category);
+                        currentCategory.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                    } else {
+                        console.log('Clicked on:', category);
+                    }
                 });
             });
         });
