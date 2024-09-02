@@ -6,17 +6,16 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Result "mo:base/Result";
 import HashMap "mo:base/HashMap";
-import Blob "mo:base/Blob";
 
 actor {
   type File = {
     id: Nat;
     name: Text;
     fileType: Text;
-    size: Nat;
+    size: ?Nat;
     category: Text;
     inTrash: Bool;
-    content: Blob;
+    preview: Text;
   };
 
   type Folder = {
@@ -30,18 +29,14 @@ actor {
   var folderIdCounter : Nat = 0;
 
   public query func getFiles() : async [File] {
-    Array.filter(files, func (f : File) : Bool { not f.inTrash })
-  };
-
-  public query func getTrashFiles() : async [File] {
-    Array.filter(files, func (f : File) : Bool { f.inTrash })
+    files
   };
 
   public query func getFolders() : async [Folder] {
     folders
   };
 
-  public func uploadFile(name : Text, fileType : Text, size : Nat, category : Text, content : Blob) : async Result.Result<Nat, Text> {
+  public func uploadFile(name : Text, fileType : Text, size : ?Nat, category : Text, preview : Text) : async Result.Result<Nat, Text> {
     fileIdCounter += 1;
     let newFile : File = {
       id = fileIdCounter;
@@ -50,7 +45,7 @@ actor {
       size = size;
       category = category;
       inTrash = false;
-      content = content;
+      preview = preview;
     };
     files := Array.append(files, [newFile]);
     #ok(fileIdCounter)
@@ -76,7 +71,7 @@ actor {
           size = f.size;
           category = "trash";
           inTrash = true;
-          content = f.content;
+          preview = f.preview;
         }
       } else {
         f
@@ -95,7 +90,7 @@ actor {
           size = f.size;
           category = f.category;
           inTrash = false;
-          content = f.content;
+          preview = f.preview;
         }
       } else {
         f
@@ -107,10 +102,6 @@ actor {
   public func deleteFolder(id : Nat) : async Result.Result<(), Text> {
     folders := Array.filter(folders, func (f : Folder) : Bool { f.id != id });
     #ok(())
-  };
-
-  public query func getFilesByCategory(category : Text) : async [File] {
-    Array.filter(files, func (f : File) : Bool { f.category == category and not f.inTrash })
   };
 
   // System functions for upgrades

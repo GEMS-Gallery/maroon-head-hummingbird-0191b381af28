@@ -5,85 +5,407 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FileBox</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
-    <script src="https://unpkg.com/@dfinity/agent@0.15.1/lib/index.js"></script>
-    <script src="https://unpkg.com/@dfinity/candid@0.15.1/lib/index.js"></script>
     <style>
-        /* ... (styles remain unchanged) ... */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            padding: 1rem;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .upload-btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .upload-btn:hover {
+            background-color: #333;
+        }
+        .search-container {
+            margin: 1rem 0;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .files-container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .files-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .files-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-item:hover {
+            background-color: #f0f0f0;
+        }
+        .file-icon {
+            margin-right: 1rem;
+            width: 24px;
+            height: 24px;
+        }
+        .file-preview {
+            width: 40px;
+            height: 40px;
+            margin-right: 1rem;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .file-details {
+            flex-grow: 1;
+        }
+        .file-name {
+            margin: 0;
+            font-weight: 500;
+        }
+        .file-info {
+            font-size: 0.875rem;
+            color: #666;
+        }
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .icon-file-text { color: #4299e1; }
+        .icon-folder { color: #ecc94b; }
+        .icon-code { color: #805ad5; }
+        .icon-image { color: #48bb78; }
+        .icon-music { color: #ed64a6; }
+        .icon-archive { color: #ed8936; }
+        .icon-film { color: #e53e3e; }
+        .menu-category {
+            margin-bottom: 1.5rem;
+        }
+        .menu-category h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #333;
+            text-decoration: none;
+        }
+        .menu-item:hover {
+            background-color: #e0e0e0;
+        }
+        .menu-item i {
+            margin-right: 0.5rem;
+        }
+        .menu-item.active {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            background-color: #f0f0f0;
+        }
+        #fileInput {
+            display: none;
+        }
+        #categorySelect {
+            margin-top: 10px;
+            width: 100%;
+            padding: 5px;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .view-toggle button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        .view-toggle button.active {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+        }
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .file-item-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .file-item-grid:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .file-preview-grid {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .file-name-grid {
+            font-weight: 500;
+            margin: 0.5rem 0;
+            word-break: break-word;
+        }
+        .file-info-grid {
+            font-size: 0.75rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
-    <!-- ... (HTML structure remains unchanged) ... -->
+    <aside class="sidebar">
+        <div class="menu-category">
+            <h3>Files</h3>
+            <a href="#" class="menu-item active" data-section="home">
+                <i data-feather="home"></i> Home
+            </a>
+            <a href="#" class="menu-item" data-section="my-files">
+                <i data-feather="file"></i> My Files
+            </a>
+            <a href="#" class="menu-item" data-section="shared">
+                <i data-feather="share-2"></i> Shared
+            </a>
+        </div>
+        <div class="menu-category">
+            <h3>Categories</h3>
+            <a href="#" class="menu-item" data-section="photos">
+                <i data-feather="image"></i> Photos
+            </a>
+            <a href="#" class="menu-item" data-section="videos">
+                <i data-feather="film"></i> Videos
+            </a>
+            <a href="#" class="menu-item" data-section="documents">
+                <i data-feather="file-text"></i> Documents
+            </a>
+            <a href="#" class="menu-item" data-section="audio">
+                <i data-feather="music"></i> Audio
+            </a>
+        </div>
+        <div class="menu-category">
+            <h3>Storage</h3>
+            <a href="#" class="menu-item" data-section="trash">
+                <i data-feather="trash-2"></i> Trash
+            </a>
+            <a href="#" class="menu-item" data-section="storage-usage">
+                <i data-feather="hard-drive"></i> Storage Usage
+            </a>
+        </div>
+    </aside>
+    <div class="main-content">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <h1>FileBox</h1>
+                    <button class="upload-btn" id="uploadBtn">
+                        <i data-feather="upload"></i>
+                        Upload
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <main class="container">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search files and folders">
+                <i data-feather="search" class="search-icon"></i>
+            </div>
+            
+            <div class="files-container">
+                <div class="files-header">
+                    <h2 id="currentCategory">My Files</h2>
+                    <div class="view-toggle">
+                        <button id="gridViewBtn" onclick="setViewMode('grid')">
+                            <i data-feather="grid"></i>
+                        </button>
+                        <button id="listViewBtn" onclick="setViewMode('list')">
+                            <i data-feather="list"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="filesContainer"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Upload File</h2>
+            <div class="upload-area" id="dropArea">
+                <p>Drag and drop files here or click to select files</p>
+                <input type="file" id="fileInput" multiple>
+            </div>
+            <select id="categorySelect">
+                <option value="">Select category (optional)</option>
+                <option value="documents">Documents</option>
+                <option value="photos">Photos</option>
+                <option value="videos">Videos</option>
+                <option value="audio">Audio</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+    </div>
 
     <script>
-        let actor;
+        const files = [
+            { id: 1, name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=PDF' },
+            { id: 2, name: 'Images', type: 'folder', items: 15, icon: 'folder', category: 'photos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=Folder' },
+            { id: 3, name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=PPTX' },
+            { id: 4, name: 'Script.js', type: 'file', size: '10 KB', icon: 'code', category: 'documents', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=JS' },
+            { id: 5, name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image', category: 'photos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=JPG' },
+            { id: 6, name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music', category: 'audio', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP3' },
+            { id: 7, name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive', category: 'other', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=ZIP' },
+            { id: 8, name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP4' },
+        ];
+
         let currentViewMode = 'list';
-        let currentCategory = 'all';
-
-        const canisterInterface = {
-            getFiles: () => [],
-            getTrashFiles: () => [],
-            getFilesByCategory: (category) => [],
-            uploadFile: (name, fileType, size, category, content) => ({ ok: 0 }),
-            moveFileToTrash: (id) => ({ ok: null }),
-            restoreFileFromTrash: (id) => ({ ok: null }),
-            createFolder: (name) => ({ ok: 0 }),
-            deleteFolder: (id) => ({ ok: null }),
-        };
-
-        async function initializeActor() {
-            const canisterId = 'rrkah-fqaaa-aaaaa-aaaaq-cai'; // Replace with your actual canister ID
-            try {
-                const agent = new window.ic.agent.HttpAgent();
-                await agent.fetchRootKey();
-                actor = window.ic.actor.createActor(canisterInterface, { agent, canisterId });
-            } catch (error) {
-                console.error('Error initializing actor:', error);
-            }
-        }
-
-        async function fetchFiles() {
-            if (!actor) {
-                console.error('Actor not initialized');
-                return [];
-            }
-            try {
-                if (currentCategory === 'all' || currentCategory === 'my-files') {
-                    return await actor.getFiles();
-                } else if (currentCategory === 'trash') {
-                    return await actor.getTrashFiles();
-                } else {
-                    return await actor.getFilesByCategory(currentCategory);
-                }
-            } catch (error) {
-                console.error('Error fetching files:', error);
-                return [];
-            }
-        }
 
         function setViewMode(mode) {
             currentViewMode = mode;
             document.getElementById('gridViewBtn').classList.toggle('active', mode === 'grid');
             document.getElementById('listViewBtn').classList.toggle('active', mode === 'list');
-            renderFiles();
+            renderFiles(currentCategory);
         }
 
-        async function renderFiles() {
+        function renderFiles(category = 'all') {
             const filesContainer = document.getElementById('filesContainer');
             filesContainer.innerHTML = '';
             
-            const files = await fetchFiles();
+            const filteredFiles = category === 'all' 
+                ? files.filter(file => !file.inTrash)
+                : category === 'trash'
+                ? files.filter(file => file.inTrash)
+                : files.filter(file => file.category === category && !file.inTrash);
             
             if (currentViewMode === 'list') {
                 filesContainer.className = 'files-list';
-                files.forEach(file => {
+                filteredFiles.forEach(file => {
                     const li = document.createElement('li');
                     li.className = 'file-item';
                     li.innerHTML = `
-                        <img src="data:image/png;base64,${arrayBufferToBase64(file.content)}" alt="${file.name} preview" class="file-preview">
-                        <i data-feather="${getFileIcon(file.fileType)}" class="file-icon icon-${getFileIcon(file.fileType)}"></i>
+                        <img src="${file.preview}" alt="${file.name} preview" class="file-preview">
+                        <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
                         <div class="file-details">
                             <p class="file-name">${file.name}</p>
-                            <p class="file-info">${formatFileSize(file.size)} - ${file.category}</p>
+                            <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`} - ${file.category}</p>
                         </div>
                         <div class="file-actions">
                             ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
@@ -94,13 +416,13 @@
                 });
             } else {
                 filesContainer.className = 'files-grid';
-                files.forEach(file => {
+                filteredFiles.forEach(file => {
                     const div = document.createElement('div');
                     div.className = 'file-item-grid';
                     div.innerHTML = `
-                        <img src="data:image/png;base64,${arrayBufferToBase64(file.content)}" alt="${file.name} preview" class="file-preview-grid">
+                        <img src="${file.preview}" alt="${file.name} preview" class="file-preview-grid">
                         <p class="file-name-grid">${file.name}</p>
-                        <p class="file-info-grid">${formatFileSize(file.size)}</p>
+                        <p class="file-info-grid">${file.type === 'file' ? file.size : `${file.items} items`}</p>
                         <div class="file-actions">
                             ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
                             ${file.inTrash ? `<i data-feather="refresh-cw" class="restore-icon" onclick="restoreFromTrash(${file.id})"></i>` : ''}
@@ -114,36 +436,30 @@
             feather.replace();
         }
 
-        async function moveToTrash(fileId) {
-            if (!actor) {
-                console.error('Actor not initialized');
-                return;
-            }
-            try {
-                await actor.moveFileToTrash(fileId);
-                renderFiles();
-            } catch (error) {
-                console.error('Error moving file to trash:', error);
+        function moveToTrash(fileId) {
+            const fileIndex = files.findIndex(file => file.id === fileId);
+            if (fileIndex !== -1) {
+                files[fileIndex].inTrash = true;
+                files[fileIndex].category = 'trash';
+                renderFiles(currentCategory);
             }
         }
 
-        async function restoreFromTrash(fileId) {
-            if (!actor) {
-                console.error('Actor not initialized');
-                return;
-            }
-            try {
-                await actor.restoreFileFromTrash(fileId);
-                renderFiles();
-            } catch (error) {
-                console.error('Error restoring file from trash:', error);
+        function restoreFromTrash(fileId) {
+            const fileIndex = files.findIndex(file => file.id === fileId);
+            if (fileIndex !== -1) {
+                files[fileIndex].inTrash = false;
+                renderFiles('trash');
             }
         }
 
         function setActiveMenuItem(clickedItem) {
+            // Remove 'active' class from all menu items
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
             });
+
+            // Add 'active' class to the clicked item
             clickedItem.classList.add('active');
         }
 
@@ -192,26 +508,14 @@
             handleFiles(this.files);
         }
 
-        async function handleFiles(files) {
-            if (!actor) {
-                console.error('Actor not initialized');
-                return;
-            }
+        function handleFiles(files) {
             for (let file of files) {
-                try {
-                    const reader = new FileReader();
-                    reader.onload = async function(e) {
-                        const content = new Uint8Array(e.target.result);
-                        const category = categorySelect.value || detectCategory(file);
-                        await actor.uploadFile(file.name, file.type, file.size, category, content);
-                    };
-                    reader.readAsArrayBuffer(file);
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                }
+                console.log("File uploaded:", file.name);
+                // Here you would typically send the file to your backend
+                // For now, we'll just add it to our files array
+                addFileToList(file);
             }
             modal.style.display = "none";
-            renderFiles();
         }
 
         function detectCategory(file) {
@@ -231,61 +535,63 @@
             }
         }
 
-        function getFileIcon(fileType) {
-            const type = fileType.split('/')[0];
-            switch(type) {
-                case 'image': return 'image';
-                case 'video': return 'film';
-                case 'audio': return 'music';
-                case 'application':
-                case 'text':
-                    return 'file-text';
-                default:
-                    return 'file';
+        function addFileToList(file) {
+            const fileSize = (file.size / 1024).toFixed(1) + " KB";
+            const fileType = file.type.split('/')[0];
+            let icon = 'file';
+            let preview = 'https://via.placeholder.com/40x40.png?text=File';
+            if (fileType === 'image') {
+                icon = 'image';
+                preview = URL.createObjectURL(file);
             }
+            else if (fileType === 'video') icon = 'film';
+            else if (fileType === 'audio') icon = 'music';
+
+            const category = categorySelect.value || detectCategory(file);
+
+            const newFile = {
+                id: files.length + 1,
+                name: file.name,
+                type: 'file',
+                size: fileSize,
+                icon: icon,
+                category: category,
+                inTrash: false,
+                preview: preview
+            };
+
+            files.unshift(newFile);
+            renderFiles(currentCategory);
         }
 
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
-            else return (bytes / 1073741824).toFixed(1) + ' GB';
-        }
+        let currentCategory = 'all';
 
-        function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return window.btoa(binary);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFiles();
+            feather.replace(); // Replace icons in the sidebar, header, and search bar
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initializeActor();
-            await renderFiles();
-            feather.replace();
-
+            // Add click event listeners to all menu items
             document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', async (event) => {
+                item.addEventListener('click', (event) => {
                     event.preventDefault();
                     setActiveMenuItem(item);
                     const category = item.dataset.section;
                     const currentCategoryElement = document.getElementById('currentCategory');
                     if (category === 'home') {
                         currentCategory = 'all';
+                        renderFiles('all');
                         currentCategoryElement.textContent = 'My Files';
                     } else if (['photos', 'videos', 'documents', 'audio', 'trash'].includes(category)) {
                         currentCategory = category;
+                        renderFiles(category);
                         currentCategoryElement.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                     } else {
                         console.log('Clicked on:', category);
                     }
-                    await renderFiles();
                 });
             });
 
+            // Set initial view mode
             setViewMode('list');
         });
     </script>

@@ -16,21 +16,19 @@ type Folder =
 type File = 
  record {
    category: text;
-   content: blob;
    fileType: text;
    id: nat;
    inTrash: bool;
    name: text;
-   size: nat;
+   preview: text;
+   size: opt nat;
  };
 service : {
   createFolder: (text) -> (Result);
   deleteFolder: (nat) -> (Result_1);
   getFiles: () -> (vec File) query;
-  getFilesByCategory: (text) -> (vec File) query;
   getFolders: () -> (vec Folder) query;
-  getTrashFiles: () -> (vec File) query;
   moveFileToTrash: (nat) -> (Result_1);
   restoreFileFromTrash: (nat) -> (Result_1);
-  uploadFile: (text, text, nat, text, blob) -> (Result);
+  uploadFile: (text, text, opt nat, text, text) -> (Result);
 }
