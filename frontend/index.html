@@ -163,37 +163,37 @@
     <aside class="sidebar">
         <div class="menu-category">
             <h3>Files</h3>
-            <a href="#" class="menu-item active">
+            <a href="#" class="menu-item active" data-section="home">
                 <i data-feather="home"></i> Home
             </a>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="my-files">
                 <i data-feather="file"></i> My Files
             </a>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="shared">
                 <i data-feather="share-2"></i> Shared
             </a>
         </div>
         <div class="menu-category">
             <h3>Categories</h3>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="photos">
                 <i data-feather="image"></i> Photos
             </a>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="videos">
                 <i data-feather="film"></i> Videos
             </a>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="documents">
                 <i data-feather="file-text"></i> Documents
             </a>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="audio">
                 <i data-feather="music"></i> Audio
             </a>
         </div>
         <div class="menu-category">
             <h3>Storage</h3>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="trash">
                 <i data-feather="trash-2"></i> Trash
             </a>
-            <a href="#" class="menu-item">
+            <a href="#" class="menu-item" data-section="storage-usage">
                 <i data-feather="hard-drive"></i> Storage Usage
             </a>
         </div>
@@ -262,9 +262,29 @@
             feather.replace();
         }
 
+        function setActiveMenuItem(clickedItem) {
+            // Remove 'active' class from all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add 'active' class to the clicked item
+            clickedItem.classList.add('active');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderFiles();
             feather.replace(); // Replace icons in the sidebar, header, and search bar
+
+            // Add click event listeners to all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    setActiveMenuItem(item);
+                    // Here you can add logic to change the main content based on the clicked item
+                    console.log('Clicked on:', item.dataset.section);
+                });
+            });
         });
     </script>
 </body>
