@@ -157,6 +157,52 @@
             background-color: #e0e0e0;
             font-weight: bold;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            background-color: #f0f0f0;
+        }
+        #fileInput {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -203,7 +249,7 @@
             <div class="container">
                 <div class="header-content">
                     <h1>FileBox</h1>
-                    <button class="upload-btn">
+                    <button class="upload-btn" id="uploadBtn">
                         <i data-feather="upload"></i>
                         Upload
                     </button>
@@ -226,6 +272,18 @@
                 </ul>
             </div>
         </main>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Upload File</h2>
+            <div class="upload-area" id="dropArea">
+                <p>Drag and drop files here or click to select files</p>
+                <input type="file" id="fileInput" multiple>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -270,6 +328,78 @@
 
             // Add 'active' class to the clicked item
             clickedItem.classList.add('active');
+        }
+
+        // Upload Modal
+        const modal = document.getElementById("uploadModal");
+        const btn = document.getElementById("uploadBtn");
+        const span = document.getElementsByClassName("close")[0];
+        const dropArea = document.getElementById("dropArea");
+        const fileInput = document.getElementById("fileInput");
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        dropArea.ondragover = function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = "#f0f0f0";
+        }
+
+        dropArea.ondragleave = function() {
+            this.style.backgroundColor = "";
+        }
+
+        dropArea.ondrop = function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = "";
+            handleFiles(e.dataTransfer.files);
+        }
+
+        dropArea.onclick = function() {
+            fileInput.click();
+        }
+
+        fileInput.onchange = function() {
+            handleFiles(this.files);
+        }
+
+        function handleFiles(files) {
+            for (let file of files) {
+                console.log("File uploaded:", file.name);
+                // Here you would typically send the file to your backend
+                // For now, we'll just add it to our files array
+                addFileToList(file);
+            }
+            modal.style.display = "none";
+        }
+
+        function addFileToList(file) {
+            const fileSize = (file.size / 1024).toFixed(1) + " KB";
+            const fileType = file.type.split('/')[0];
+            let icon = 'file';
+            if (fileType === 'image') icon = 'image';
+            else if (fileType === 'video') icon = 'film';
+            else if (fileType === 'audio') icon = 'music';
+
+            files.unshift({
+                name: file.name,
+                type: 'file',
+                size: fileSize,
+                icon: icon
+            });
+
+            renderFiles();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
