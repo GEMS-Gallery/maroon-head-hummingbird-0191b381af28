@@ -25,11 +25,11 @@ actor {
   var fileIdCounter : Nat = 0;
   var folderIdCounter : Nat = 0;
 
-  public func getFiles() : async [File] {
+  public query func getFiles() : async [File] {
     files
   };
 
-  public func getFolders() : async [Folder] {
+  public query func getFolders() : async [Folder] {
     folders
   };
 

@@ -24,7 +24,7 @@ service : {
   createFolder: (text) -> (Result);
   deleteFile: (nat) -> (Result_1);
   deleteFolder: (nat) -> (Result_1);
-  getFiles: () -> (vec File);
-  getFolders: () -> (vec Folder);
+  getFiles: () -> (vec File) query;
+  getFolders: () -> (vec Folder) query;
   uploadFile: (text, text, opt nat) -> (Result);
 }

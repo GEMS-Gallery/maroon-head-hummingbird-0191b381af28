@@ -12,8 +12,8 @@ export const idlFactory = ({ IDL }) => {
     'createFolder' : IDL.Func([IDL.Text], [Result], []),
     'deleteFile' : IDL.Func([IDL.Nat], [Result_1], []),
     'deleteFolder' : IDL.Func([IDL.Nat], [Result_1], []),
-    'getFiles' : IDL.Func([], [IDL.Vec(File)], []),
-    'getFolders' : IDL.Func([], [IDL.Vec(Folder)], []),
+    'getFiles' : IDL.Func([], [IDL.Vec(File)], ['query']),
+    'getFolders' : IDL.Func([], [IDL.Vec(Folder)], ['query']),
     'uploadFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Opt(IDL.Nat)],
         [Result],

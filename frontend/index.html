@@ -1,13 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FileBox</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            padding: 1rem;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .upload-btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .upload-btn:hover {
+            background-color: #333;
+        }
+        .search-container {
+            margin: 1rem 0;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .files-container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .files-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .files-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-item:hover {
+            background-color: #f0f0f0;
+        }
+        .file-icon {
+            margin-right: 1rem;
+            width: 24px;
+            height: 24px;
+        }
+        .file-details {
+            flex-grow: 1;
+        }
+        .file-name {
+            margin: 0;
+            font-weight: 500;
+        }
+        .file-info {
+            font-size: 0.875rem;
+            color: #666;
+        }
+        .more-options {
+            color: #999;
+            cursor: pointer;
+        }
+        .icon-file-text { color: #4299e1; }
+        .icon-folder { color: #ecc94b; }
+        .icon-code { color: #805ad5; }
+        .icon-image { color: #48bb78; }
+        .icon-music { color: #ed64a6; }
+        .icon-archive { color: #ed8936; }
+        .icon-film { color: #e53e3e; }
+        .menu-category {
+            margin-bottom: 1.5rem;
+        }
+        .menu-category h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #333;
+            text-decoration: none;
+        }
+        .menu-item:hover {
+            background-color: #e0e0e0;
+        }
+        .menu-item i {
+            margin-right: 0.5rem;
+        }
+        .menu-item.active {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="menu-category">
+            <h3>Files</h3>
+            <a href="#" class="menu-item active">
+                <i data-feather="home"></i> Home
+            </a>
+            <a href="#" class="menu-item">
+                <i data-feather="file"></i> My Files
+            </a>
+            <a href="#" class="menu-item">
+                <i data-feather="share-2"></i> Shared
+            </a>
+        </div>
+        <div class="menu-category">
+            <h3>Categories</h3>
+            <a href="#" class="menu-item">
+                <i data-feather="image"></i> Photos
+            </a>
+            <a href="#" class="menu-item">
+                <i data-feather="film"></i> Videos
+            </a>
+            <a href="#" class="menu-item">
+                <i data-feather="file-text"></i> Documents
+            </a>
+            <a href="#" class="menu-item">
+                <i data-feather="music"></i> Audio
+            </a>
+        </div>
+        <div class="menu-category">
+            <h3>Storage</h3>
+            <a href="#" class="menu-item">
+                <i data-feather="trash-2"></i> Trash
+            </a>
+            <a href="#" class="menu-item">
+                <i data-feather="hard-drive"></i> Storage Usage
+            </a>
+        </div>
+    </aside>
+    <div class="main-content">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <h1>FileBox</h1>
+                    <button class="upload-btn">
+                        <i data-feather="upload"></i>
+                        Upload
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <main class="container">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search files and folders">
+                <i data-feather="search" class="search-icon"></i>
+            </div>
+            
+            <div class="files-container">
+                <div class="files-header">
+                    <h2>My Files</h2>
+                </div>
+                <ul class="files-list" id="filesList">
+                    <!-- File items will be inserted here by JavaScript -->
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const files = [
+            { name: 'Document.pdf', type: 'file', size: '2.5 MB', icon: 'file-text' },
+            { name: 'Images', type: 'folder', items: 15, icon: 'folder' },
+            { name: 'Presentation.pptx', type: 'file', size: '5.1 MB', icon: 'file-text' },
+            { name: 'Script.js', type: 'file', size: '10 KB', icon: 'code' },
+            { name: 'Photo.jpg', type: 'file', size: '3.2 MB', icon: 'image' },
+            { name: 'Song.mp3', type: 'file', size: '4.7 MB', icon: 'music' },
+            { name: 'Archive.zip', type: 'file', size: '15.3 MB', icon: 'archive' },
+            { name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film' },
+        ];
+
+        function renderFiles() {
+            const filesList = document.getElementById('filesList');
+            filesList.innerHTML = '';
+            
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.innerHTML = `
+                    <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
+                    <div class="file-details">
+                        <p class="file-name">${file.name}</p>
+                        <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`}</p>
+                    </div>
+                    <i data-feather="more-horizontal" class="more-options"></i>
+                `;
+                filesList.appendChild(li);
+            });
+
+            // Replace all feather icons with SVG
+            feather.replace();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFiles();
+            feather.replace(); // Replace icons in the sidebar, header, and search bar
+        });
+    </script>
+</body>
 </html>
