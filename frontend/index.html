@@ -84,6 +84,9 @@
         .files-header {
             padding: 1rem;
             border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .files-list {
             list-style-type: none;
@@ -215,6 +218,55 @@
             width: 100%;
             padding: 5px;
         }
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .view-toggle button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        .view-toggle button.active {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+        }
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .file-item-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .file-item-grid:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .file-preview-grid {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .file-name-grid {
+            font-weight: 500;
+            margin: 0.5rem 0;
+            word-break: break-word;
+        }
+        .file-info-grid {
+            font-size: 0.75rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -278,10 +330,16 @@
             <div class="files-container">
                 <div class="files-header">
                     <h2 id="currentCategory">My Files</h2>
+                    <div class="view-toggle">
+                        <button id="gridViewBtn" onclick="setViewMode('grid')">
+                            <i data-feather="grid"></i>
+                        </button>
+                        <button id="listViewBtn" onclick="setViewMode('list')">
+                            <i data-feather="list"></i>
+                        </button>
+                    </div>
                 </div>
-                <ul class="files-list" id="filesList">
-                    <!-- File items will be inserted here by JavaScript -->
-                </ul>
+                <div id="filesContainer"></div>
             </div>
         </main>
     </div>
@@ -318,9 +376,18 @@
             { id: 8, name: 'Video.mp4', type: 'file', size: '52.1 MB', icon: 'film', category: 'videos', inTrash: false, preview: 'https://via.placeholder.com/40x40.png?text=MP4' },
         ];
 
+        let currentViewMode = 'list';
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            document.getElementById('gridViewBtn').classList.toggle('active', mode === 'grid');
+            document.getElementById('listViewBtn').classList.toggle('active', mode === 'list');
+            renderFiles(currentCategory);
+        }
+
         function renderFiles(category = 'all') {
-            const filesList = document.getElementById('filesList');
-            filesList.innerHTML = '';
+            const filesContainer = document.getElementById('filesContainer');
+            filesContainer.innerHTML = '';
             
             const filteredFiles = category === 'all' 
                 ? files.filter(file => !file.inTrash)
@@ -328,23 +395,42 @@
                 ? files.filter(file => file.inTrash)
                 : files.filter(file => file.category === category && !file.inTrash);
             
-            filteredFiles.forEach(file => {
-                const li = document.createElement('li');
-                li.className = 'file-item';
-                li.innerHTML = `
-                    <img src="${file.preview}" alt="${file.name} preview" class="file-preview">
-                    <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
-                    <div class="file-details">
-                        <p class="file-name">${file.name}</p>
-                        <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`} - ${file.category}</p>
-                    </div>
-                    <div class="file-actions">
-                        ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
-                        ${file.inTrash ? `<i data-feather="refresh-cw" class="restore-icon" onclick="restoreFromTrash(${file.id})"></i>` : ''}
-                    </div>
-                `;
-                filesList.appendChild(li);
-            });
+            if (currentViewMode === 'list') {
+                filesContainer.className = 'files-list';
+                filteredFiles.forEach(file => {
+                    const li = document.createElement('li');
+                    li.className = 'file-item';
+                    li.innerHTML = `
+                        <img src="${file.preview}" alt="${file.name} preview" class="file-preview">
+                        <i data-feather="${file.icon}" class="file-icon icon-${file.icon}"></i>
+                        <div class="file-details">
+                            <p class="file-name">${file.name}</p>
+                            <p class="file-info">${file.type === 'file' ? file.size : `${file.items} items`} - ${file.category}</p>
+                        </div>
+                        <div class="file-actions">
+                            ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
+                            ${file.inTrash ? `<i data-feather="refresh-cw" class="restore-icon" onclick="restoreFromTrash(${file.id})"></i>` : ''}
+                        </div>
+                    `;
+                    filesContainer.appendChild(li);
+                });
+            } else {
+                filesContainer.className = 'files-grid';
+                filteredFiles.forEach(file => {
+                    const div = document.createElement('div');
+                    div.className = 'file-item-grid';
+                    div.innerHTML = `
+                        <img src="${file.preview}" alt="${file.name} preview" class="file-preview-grid">
+                        <p class="file-name-grid">${file.name}</p>
+                        <p class="file-info-grid">${file.type === 'file' ? file.size : `${file.items} items`}</p>
+                        <div class="file-actions">
+                            ${!file.inTrash ? `<i data-feather="trash-2" class="trash-icon" onclick="moveToTrash(${file.id})"></i>` : ''}
+                            ${file.inTrash ? `<i data-feather="refresh-cw" class="restore-icon" onclick="restoreFromTrash(${file.id})"></i>` : ''}
+                        </div>
+                    `;
+                    filesContainer.appendChild(div);
+                });
+            }
 
             // Replace all feather icons with SVG
             feather.replace();
@@ -504,6 +590,9 @@
                     }
                 });
             });
+
+            // Set initial view mode
+            setViewMode('list');
         });
     </script>
 </body>
